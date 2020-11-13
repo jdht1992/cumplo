@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>Tipo de cambio</h1>
+    <form action="" method="post">
+        <label for="kind">Tipo de unidad</label>
+        <select id="kind" name="cars">
+            <option value="UDI">UDIS</option>
+            <option value="DOLLAR">DOLLAR</option>
+        </select>
+        <label for="start">Fecha Inicio</label>
+        <input type="date" id="start" name="trip-start" value="2020-11-01" max="2020-11-13" required>
+        <label for="end">Fecha Fin</label>
+        <input type="date" id="end" name="trip-end" value="2020-11-01" max="2020-11-13" required>
+        <button type="button" onclick="getInputValue();">ok</button>
+    </form>
+
+    <form action="" method="POST" enctype="multipart/form-data">{% csrf_token %}
+        <table>
+            <tr>
+                <th>Dia</th>
+                <th>Valor</th>
+            </tr>
+            {% for currency in currencies %}
+            <tr>
+                <th> {{ currency.date|date:"d/m/Y" }}</th>
+                <th> {{ currency.value }}</th>
+            </tr> 
+            {% endfor %}
+            </table>
+    </form>
+    <div class="pagination">
+        <span class="step-links">
+            {% if page_obj.has_previous %}
+                <a href="?page=1">&laquo; first</a>
+                <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+            {% endif %}
+    
+            <span class="current">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+            </span>
+    
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}">next</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+            {% endif %}
+        </span>
+    </div>
+    <p>{{ v }} </p>
+    <p>valor min: {{value_min}} </p>
+    <p>valor max: {{value_max}} </p>
+    <p>Promedio: {{value_avg}} </p>
+    <p>Promedio: {{value}} </p>
+    <p>Promedio: {{date}} </p>
+
+    <!-- <canvas id="myChart" width="50" height="50"></canvas> -->
+    <div id="container" style="width: 75%;">
+        <canvas id="pie-chart"></canvas>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
+    
+    <script>
+        function getInputValue(){
+            // Selecting the input element and get its value 
+            const kind = document.getElementById("kind").value;
+            const date_start = document.getElementById("start").value;
+            const date_end = document.getElementById("end").value;
+
+            window.location.href = `http://localhost:8000/?kind=${kind}&date_start=${date_start}&date_end=${date_end}`;
+        }
+      
+        window.onload = function() {
+        var ctx = document.getElementById('pie-chart').getContext('2d');
+        var myLineChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    datasets: [{
+                    data: {{ value|safe }},
+                    // label: 'Population'
+                    }],
+                    labels: {{ date|safe }}
+                },
+            })
+        };
+        
+    </script>
+</body>
+</html>
