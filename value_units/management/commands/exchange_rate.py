@@ -16,7 +16,7 @@ def get_bmx_data_series(id_serie, date_start, date_end):
 
     payload = {"token": "1ba45f2994e44d4bfcf76fb4dc59da324fe759dfed9b3f765a01f8adff26e7e6"}
     url = f'https://www.banxico.org.mx/SieAPIRest/service/v1/series/{id_serie}/datos/{date_initial}/{date_final}'
-    r = requests.get(url, params=payload)
+    r = requests.get(url, params=payload, timeout=1)
     if r.status_code == 200:
         response = r.json()
         data = response.get("bmx").get("series")[0].get("datos", None)
