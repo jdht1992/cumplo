@@ -1,6 +1,6 @@
 from django.urls import path
-from .views import CurrencyList
+from .views import CurrencyView
 
 urlpatterns = [
-    path("", CurrencyList.as_view(), name="pie-chart"),
+    path("", CurrencyView.as_view(), name="pie-chart"),
 ]

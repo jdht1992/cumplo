@@ -9,17 +9,17 @@
 <body>
     
     <div class="container">
-        <h1>Tipo de cambio</h1>
+        <h1>Valor historico</h1>
         <div class="d-flex justify-content-center">
             
             <form class="form-inline">
                 <select class="form-control mb-2 mr-sm-2" id="kind">
-                    <option value="UDI">UDIS</option>
+                    <option value="UDI">UDI</option>
                     <option value="DOLLAR">DOLLAR</option>
                 </select>
 
-                <input class="form-control mb-2 mr-sm-2" type="date" id="start" value="2020-11-01" max="2020-11-13" required>
-                <input class="form-control mb-2 mr-sm-2" type="date" id="end" value="2020-11-01" max="2020-11-13" required>
+                <input class="form-control mb-2 mr-sm-2" type="date" id="date_start" value="2020-11-01" required>
+                <input class="form-control mb-2 mr-sm-2" type="date" id="date_end" value="2020-11-01" required>
                 
                 <button class="btn btn-primary mb-2" type="button" onclick="getInputValue();" >Submit</button>       
             </form>
@@ -39,6 +39,10 @@
                     <td> {{ currency.date|date:"d/m/Y" }}</td>
                     <td> {{ currency.value }}</td>
                 </tr> 
+                {% empty %}
+                <tr>
+                    <td colspan="3">No existen registros</td>
+                </tr>
                 {% endfor %}
             </tbody>
         </table>
@@ -68,7 +72,7 @@
             <div class="card col-md-4" >
                 <div class="card-body">
                     {% if value_min %}
-                        <h5 class="card-title"> {{value_min}} </h5>
+                        <h5 class="card-title"> {{ min }} </h5>
                     {% else %}
                         <h5 class="card-title"> 0 </h5>
                     {% endif %}
@@ -78,7 +82,7 @@
             <div class="card col-md-4">
                 <div class="card-body">
                     {% if value_max %}
-                        <h5 class="card-title"> {{value_max}} </h5>
+                        <h5 class="card-title"> {{ max }} </h5>
                     {% else %}
                         <h5 class="card-title"> 0 </h5>
                     {% endif %}
@@ -88,7 +92,7 @@
             <div class="card col-md-4">
                 <div class="card-body">
                     {% if value_avg %}
-                        <h5 class="card-title"> {{value_avg}} </h5>
+                        <h5 class="card-title"> {{ average }} </h5>
                     {% else %}
                         <h5 class="card-title"> 0 </h5>
                     {% endif %}
@@ -97,10 +101,12 @@
             </div>
         </div>
 
-        <h4 style="margin-top: 45px;">Grafica</h4>
-        <div id="container" style="width: 100%;">
-            <canvas id="pie-chart"></canvas>
-        </div>
+        {% if value and date %}
+            <h4 style="margin-top: 45px;">Grafica</h4>
+            <div id="container" style="width: 100%;">
+                <canvas id="pie-chart"></canvas>
+            </div>
+        {% endif %}
 
     </div>
 
@@ -112,22 +118,23 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
     
     <script>
-        // Selecting the input element and get its value 
+        
         const url = new URL(window.location.href);
         const searchParam = url.searchParams;
         const pages = document.querySelectorAll(".page-link");
 
+        // Selecting the input element and get its value
         function getInputValue(){
             const kind = document.getElementById("kind").value;
-            const date_start = document.getElementById("start").value;
-            const date_end = document.getElementById("end").value;
+            const date_start = document.getElementById("date_start").value;
+            const date_end = document.getElementById("date_end").value;
             console.log(date_start)
             console.log(date_end)
 
             window.location.href = `http://localhost:8000/?kind=${kind}&date_start=${date_start}&date_end=${date_end}`;
         }
 
-        // add the page number to the parameter
+        /* Add the page number to the url parameters */
         const setParamRedirect = (param, value) => {
             searchParam.set(param, value);
             window.location.href = url.href;
@@ -138,12 +145,12 @@
             pages[i].addEventListener('click', function (e) {
                 e.preventDefault();
                 let pageNumber = this.search.split("=")[1];
-                console.log(pageNumber)
                 setParamRedirect("page", pageNumber)
             });
         }
       
-        window.onload = function() {
+        /* Create a bar chart for all dataset and render in our page. */
+        /* window.onload = function() {
         var ctx = document.getElementById('pie-chart').getContext('2d');
         var myLineChart = new Chart(ctx, {
                 type: 'line',
@@ -154,7 +161,7 @@
                     labels: {{ date|safe }}
                 },
             })
-        };
+        };*/
         
     </script>
 </body>

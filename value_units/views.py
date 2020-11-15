@@ -1,30 +1,56 @@
-from django.shortcuts import render
-# from django.views.generic import ListView
-from django.views import View
-from .models import Currency
-from django.db.models import Avg, Max, Min
-from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 import datetime
 
+from django.shortcuts import render
+from django.db.models import Avg, Max, Min
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from django.views import View
 
-class CurrencyList(View):
+from .models import Currency, KIND
+
+
+class CurrencyView(View):
     paginate_by = 10
-    template_name = 'currency/currency_list.html'
-    
+    template_name = "currency/currency_list.html"
+    CURRENCY = {"UDI": 1, "DOLLAR": 2}  # Cambialo a plural
+
     def get(self, request):
-        queryset = Currency.objects.none()
-        date_start = self.request.GET.get("date_start", None)
-        date_end = self.request.GET.get("date_end", None)
-        kind = self.request.GET.get("kind", None)
+        date_start = request.GET.get("date_start", None)
+        date_end = request.GET.get("date_end", None)
+        kind = request.GET.get("kind", None)
+        page = request.GET.get("page")
+        context = {}
 
         if kind and date_start and date_end:
-            date_start = datetime.datetime.strptime(date_start, '%Y-%m-%d')
-            date_end = datetime.datetime.strptime(date_end, '%Y-%m-%d')
-            kind = 1 if kind == "UDI" else 2
-            queryset = Currency.objects.filter(kind=kind, date__gte=date_start, date__lte=date_end).order_by("date")
-        # queryset = Currency.objects.all()
+            queryset = self._get_queryset(kind, date_start, date_end)
+            paginated = self._get_paginator(queryset, page)
+            context = self._get_context(queryset, paginated)
+
+        return render(request, self.template_name, context)
+
+    def _get_queryset(self, kind, date_start, date_end):
+        """Return a filtered queryset using the parameters given.
+        :param kind: str (1=UDIS, 2=DOLLAR)
+        :param date_start: str  YYYY-MM-DD
+        :param date_end: str YYYY-MM-DD
+        :return: queryset
+        """
+        parameters = {
+            "kind": self.CURRENCY.get(kind),
+            "date__gte": self._convert_str_datetime(date_start),
+            "date__lte": self._convert_str_datetime(date_end),
+        }
+        return Currency.objects.filter(**parameters).order_by("date")
+
+    def _convert_str_datetime(self, date):
+        return datetime.datetime.strptime(date, "%Y-%m-%d")
+
+    def _get_paginator(self, queryset, page):
+        """ Return a list of items with paginated results. 
+        :param queryset: queryset filtered
+        :param page: Page number
+        :return: context
+        """
         paginator = Paginator(queryset, self.paginate_by)
-        page = request.GET.get('page')
 
         try:
             paginated = paginator.get_page(page)
@@ -33,13 +59,26 @@ class CurrencyList(View):
         except EmptyPage:
             paginated = paginator.page(paginator.num_pages)
 
+        return paginated
 
+    def _get_context(self, queryset, paginated):
+        """Return multiple context that will be used in template of this view.
+        :param queryset: queryset filtered
+        :param paginated: Paginator object
+        :return: objects paginered
+        """
         context = {
             "currencies": paginated,
-            "value_avg": queryset.aggregate(Avg('value')).get("value__avg", 0),  
-            "value_max": queryset.aggregate(Max('value')).get('value__max', 0),
-            "value_min": queryset.aggregate(Min('value')).get("value__min", 0),
-            "date": [str(dt) for dt in queryset.values_list('date', flat=True)],
-            "value": [float(dt) for dt in queryset.values_list('value', flat=True)]
+            "average": queryset.aggregate(Avg("value")).get("value__avg", 0),
+            "max": queryset.aggregate(Max("value")).get("value__max", 0),
+            "min": queryset.aggregate(Min("value")).get("value__min", 0),
+            "date": self._get_range_dates(queryset),
+            "value": self._get_range_values(queryset),
         }
-        return render(request, self.template_name, context)
+        return context
+
+    def _get_range_dates(self, queryset):
+        return [str(date) for date in queryset.values_list("date", flat=True)]
+
+    def _get_range_values(self, queryset):
+        return [float(value) for value in queryset.values_list("value", flat=True)]
