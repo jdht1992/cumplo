@@ -2,5 +2,5 @@ from django.urls import path
 from .views import CurrencyView
 
 urlpatterns = [
-    path("", CurrencyView.as_view(), name="pie-chart"),
+    path("", CurrencyView.as_view(), name="home"),
 ]

@@ -6,12 +6,10 @@
     <title>Document</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
 </head>
-<body>
-    
+<body>    
     <div class="container">
         <h1>Valor historico</h1>
-        <div class="d-flex justify-content-center">
-            
+        <div class="d-flex justify-content-center">            
             <form class="form-inline">
                 <select class="form-control mb-2 mr-sm-2" id="kind">
                     <option value="UDI">UDI</option>
@@ -19,12 +17,12 @@
                 </select>
 
                 <input class="form-control mb-2 mr-sm-2" type="date" id="date_start" value="2020-11-01" required>
-                <input class="form-control mb-2 mr-sm-2" type="date" id="date_end" value="2020-11-01" required>
+                <input class="form-control mb-2 mr-sm-2" type="date" id="date_end" value="2020-11-16" required>
                 
-                <button class="btn btn-primary mb-2" type="button" onclick="getInputValue();" >Submit</button>       
+                <button class="btn btn-primary mb-2 btn-submit" type="button">Submit</button>       
             </form>
         </div>
-        <table id="dtBasicExample" class="table table-striped table-bordered table-sm" cellspacing="0" width="100%">
+        <table class="table table-striped table-bordered table-sm" cellspacing="0" width="100%">
             <thead>
                 <tr>
                     <th>#</th>
@@ -54,11 +52,6 @@
                         <li class="page-item"><a class="page-link" href="?page=1">&laquo; Primero</a></li>
                         <li class="page-item"><a class="page-link" href="?page={{ currencies.previous_page_number }}">Anterior</a></li>
                     {% endif %}
-        
-                    <!-- <span class="current">
-                        Page {{ currencies.number }} of {{ currencies.paginator.num_pages }}.
-                    </span> -->
-        
                     {% if currencies.has_next %}
                         <li class="page-item"><a class="page-link" href="?page={{ currencies.next_page_number }}">Siguiente</a></li>
                         <li class="page-item"><a class="page-link" href="?page={{ currencies.paginator.num_pages }}">Ultimo &raquo;</a></li>
@@ -71,8 +64,8 @@
         <div class="row">
             <div class="card col-md-4" >
                 <div class="card-body">
-                    {% if value_min %}
-                        <h5 class="card-title"> {{ min }} </h5>
+                    {% if min %}
+                        <h5 class="card-title"> {{ min|floatformat:6 }} </h5>
                     {% else %}
                         <h5 class="card-title"> 0 </h5>
                     {% endif %}
@@ -81,8 +74,8 @@
             </div>
             <div class="card col-md-4">
                 <div class="card-body">
-                    {% if value_max %}
-                        <h5 class="card-title"> {{ max }} </h5>
+                    {% if max %}
+                        <h5 class="card-title"> {{ max|floatformat:6 }} </h5>
                     {% else %}
                         <h5 class="card-title"> 0 </h5>
                     {% endif %}
@@ -91,8 +84,8 @@
             </div>
             <div class="card col-md-4">
                 <div class="card-body">
-                    {% if value_avg %}
-                        <h5 class="card-title"> {{ average }} </h5>
+                    {% if average %}
+                        <h5 class="card-title"> {{ average|floatformat:6 }} </h5>
                     {% else %}
                         <h5 class="card-title"> 0 </h5>
                     {% endif %}
@@ -109,8 +102,6 @@
         {% endif %}
 
     </div>
-
-    <!-- <canvas id="myChart" width="50" height="50"></canvas> -->
     
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
@@ -118,27 +109,23 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
     
     <script>
-        
+        const host = `http://localhost`;
+        const port = 8000
+        const btnSubmit = document.querySelector(".btn-submit");
         const url = new URL(window.location.href);
         const searchParam = url.searchParams;
         const pages = document.querySelectorAll(".page-link");
-
-        // Selecting the input element and get its value
-        function getInputValue(){
+        const chart = document.getElementById('pie-chart')
+        
+        btnSubmit.addEventListener("click", () => {
             const kind = document.getElementById("kind").value;
-            const date_start = document.getElementById("date_start").value;
-            const date_end = document.getElementById("date_end").value;
-            console.log(date_start)
-            console.log(date_end)
+            const dateStart = document.getElementById("date_start").value;
+            const dateEnd = document.getElementById("date_end").value;
 
-            window.location.href = `http://localhost:8000/?kind=${kind}&date_start=${date_start}&date_end=${date_end}`;
-        }
-
-        /* Add the page number to the url parameters */
-        const setParamRedirect = (param, value) => {
-            searchParam.set(param, value);
-            window.location.href = url.href;
-        }
+            let url = `${host}:${port}/?kind=${kind}&date_start=${dateStart}&date_end=${dateEnd}`;
+    
+            window.location.href = url;
+        })
 
         /* Paginator */
         for (let i = 0; i < pages.length; i++) {
@@ -148,20 +135,29 @@
                 setParamRedirect("page", pageNumber)
             });
         }
-      
+        
+        /* Add the page number to the url parameters */
+        const setParamRedirect = (param, value) => {
+            searchParam.set(param, value);
+            window.location.href = url.href;
+        }
+        
         /* Create a bar chart for all dataset and render in our page. */
-        /* window.onload = function() {
-        var ctx = document.getElementById('pie-chart').getContext('2d');
-        var myLineChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    datasets: [{
-                    data: {{ value|safe }},
-                    }],
-                    labels: {{ date|safe }}
-                },
-            })
-        };*/
+        window.onload = function() {
+            if (chart){
+                chart.getContext('2d');
+                const myLineChart = new Chart(chart, {
+                        type: 'line',
+                        data: {
+                            datasets: [{
+                            data: {% if value %} {{ value|safe }} {% else %} [] {% endif %}
+                            }],
+                            labels: {% if date %} {{ date|safe }} {% else %} [] {% endif %}
+                        },
+                    })
+                };
+            }            
+
         
     </script>
 </body>
