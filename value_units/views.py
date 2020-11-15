@@ -8,6 +8,9 @@ from django.views import View
 from .models import Currency, KIND
 
 
+def convert_str_datetime(date):
+    return datetime.datetime.strptime(date, "%Y-%m-%d")
+
 class CurrencyView(View):
     paginate_by = 10
     template_name = "currency/currency_list.html"
@@ -22,6 +25,7 @@ class CurrencyView(View):
 
         if kind and date_start and date_end:
             queryset = self._get_queryset(kind, date_start, date_end)
+            print(queryset.count())
             paginated = self._get_paginator(queryset, page)
             context = self._get_context(queryset, paginated)
 
@@ -36,13 +40,10 @@ class CurrencyView(View):
         """
         parameters = {
             "kind": self.CURRENCY.get(kind),
-            "date__gte": self._convert_str_datetime(date_start),
-            "date__lte": self._convert_str_datetime(date_end),
+            "date__gte": convert_str_datetime(date_start),
+            "date__lte": convert_str_datetime(date_end),
         }
         return Currency.objects.filter(**parameters).order_by("date")
-
-    def _convert_str_datetime(self, date):
-        return datetime.datetime.strptime(date, "%Y-%m-%d")
 
     def _get_paginator(self, queryset, page):
         """ Return a list of items with paginated results. 
