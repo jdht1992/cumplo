@@ -23,26 +23,26 @@ Clonación del proyecto
 git clone https://github.com/jdht1992/cumplo.git
 ```
 
-Crear y activar virtualenv
+Crear y activar virtualenv.
 ```sh
 python3 -m venv env_cumplo
 source env_cumplo/bin/activate
 ```
-Instalacion de paquetes
+Instalacion de paquetes.
 ```
 cd cumplo
 pip install -r requirements.txt
 ```
 
-### Ejecutar proyecto 
+### Ejecutar proyecto .
 
-Se aplican las migraciones y se corre el proyecto
+Se aplican las migraciones y se corre el proyecto.
 ```sh
 python manage.py migrate
 python manage.py runserver
 ```
 
-#### Comando para obtener los valores de dollar y udis
+#### Comando para obtener los valores de dollar y udis.
 ```sh
 python manage.py get_currency_values --kind "DOLLAR" --date_start "2020-11-01" --date_end "2020-11-16"
 python manage.py get_currency_values --kind "UDIS" --date_start "2020-11-01" --date_end "2020-11-16"
@@ -53,7 +53,6 @@ python manage.py get_currency_values --kind "UDIS" --date_start "2020-11-01" --d
 Para mejorar este proyecto recomiendo las siguientes acciones
  - Integracion de Docker y docker-compose para mejorar la compatibilidad.
  - Manejar el command mediante un crontab para automatizar.
- - Agregar Pruebas Unitarias y pytest
+ - Agregar Pruebas Unitarias y pytest.
  - Preteger las credenciales usando [Django-environ](https://github.com/joke2k/django-environ)
- - Agregar un logging
-    
+ - Agregar un logging.

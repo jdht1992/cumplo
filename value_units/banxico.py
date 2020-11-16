@@ -15,7 +15,7 @@ class Banxico:
         :param type_currency: str SP68257
         :param date_start: str  YYYY-MM-DD
         :param date_end: str YYYY-MM-DD
-        :return: URL
+        :return: list []
         """
         if not date_start and not date_end:
             today = datetime.now()
@@ -33,7 +33,7 @@ class Banxico:
         :param type_currency: str SP68257
         :param date_start: str  YYYY-MM-DD
         :param date_end: str YYYY-MM-DD
-        :return: []
+        :return: list []
         """
         data = []
         try:
