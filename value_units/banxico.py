@@ -11,11 +11,11 @@ class Banxico:
     SERIES = {"SP68257": 1, "SF63528": 2}
 
     def get_response_date_range(self, type_currency, date_start, date_end):
-        """ validate and assign value of dates, return the response of the api 
+        """validate and assign value of dates, return the response of the api
         :param type_currency: str SP68257
         :param date_start: str  YYYY-MM-DD
         :param date_end: str YYYY-MM-DD
-        :return: URL  
+        :return: URL
         """
         if not date_start and not date_end:
             today = datetime.now()
@@ -29,7 +29,7 @@ class Banxico:
         return response
 
     def _request_data(self, type_currency, date_start, date_end):
-        """ makes requests to the api of bank of mexico for retrieve information about different series value 
+        """makes requests to the api of bank of mexico for retrieve information about different series value
         :param type_currency: str SP68257
         :param date_start: str  YYYY-MM-DD
         :param date_end: str YYYY-MM-DD
@@ -57,10 +57,4 @@ class Banxico:
         }
 
     def _get_url(self, type_currency, date_start, date_end):
-        """
-        :param type_currency: str SP68257
-        :param date_start: str  YYYY-MM-DD
-        :param date_end: str YYYY-MM-DD
-        :return: URL        
-        """
         return f"https://www.banxico.org.mx/SieAPIRest/service/v1/series/{type_currency}/datos/{date_start}/{date_end}"

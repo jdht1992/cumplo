@@ -25,7 +25,6 @@ class CurrencyView(View):
 
         if kind and date_start and date_end:
             queryset = self._get_queryset(kind, date_start, date_end)
-            print(queryset.count())
             paginated = self._get_paginator(queryset, page)
             context = self._get_context(queryset, paginated)
 
